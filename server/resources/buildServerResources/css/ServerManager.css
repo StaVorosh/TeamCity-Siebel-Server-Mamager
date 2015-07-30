@@ -1,0 +1,47 @@
+/*.siebel-comp-online,*/
+/*.siebel-comp-not-online,*/
+/*.siebel-comp-shutdown {*/
+/*width: 20px;*/
+/*height: 20px;*/
+/*border-radius: 20px;*/
+/*}*/
+
+td.highlight[data-param-name="CP_DISP_RUN_STATE"]:before {
+    content: "";
+    width: 21px;
+    height: 21px;
+    text-align: center;
+    line-height: 21px;
+    color: #fff;
+    display: block;
+    float: left;
+    margin-right: 3px;
+    border-radius: 21px;
+    font-family: FontAwesome;
+}
+
+.siebel-comp-running:before,
+.siebel-comp-shutting-down:before,
+.siebel-comp-not-online:before {
+    content: "\f021" !important;
+    -webkit-animation: spin 2s infinite linear;
+    animation: spin 2s infinite linear;
+}
+
+.siebel-comp-online:before,
+.siebel-comp-running:before {
+    background-color: #27ae60;
+}
+
+.siebel-comp-shutdown:before,
+.siebel-comp-shutting-down:before,
+.siebel-comp-unavailable:before {
+    background-color: #c1392b;
+}
+
+.siebel-comp-not-online:before,
+.siebel-comp-partially-offline:before,
+.siebel-comp-paused:before {
+    background-color: #f39c12;
+    color: #2980b9 !important;
+}
