@@ -43,7 +43,7 @@ public class ServerManagerPool {
         catch (SrvrMgrException e) {}
       }
     };
-    timer.schedule(task, 0L, 20000L);
+    timer.schedule(task, 0L, 21000L);
   }
 
   private void checkPoolInstances(long idleTime) throws IOException, SrvrMgrException {
