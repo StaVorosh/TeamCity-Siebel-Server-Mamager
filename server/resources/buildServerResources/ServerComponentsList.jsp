@@ -26,7 +26,14 @@
         /css/admin/adminMain.css
         ${teamcityPluginResourcesPath}css/ServerManager.css
     </bs:linkCSS>
-                <bs:linkScript>${teamcityPluginResourcesPath}js/ServerManager.js</bs:linkScript>
+            <bs:linkScript>
+                ${teamcityPluginResourcesPath}js/ServerManager.js
+            </bs:linkScript>
+                <bs:refreshable containerId="serverConfigurationMessageComponent" pageUrl="${pageUrl}">
+
+                    <bs:messages key="serverConfigurationMessage"/>
+
+                </bs:refreshable>
     </jsp:attribute>
   <jsp:attribute name="body_include">
     <h1>${pluginName}</h1>
@@ -44,46 +51,54 @@
                     value='${comp.CC_ALIAS}'/>&server=${serverName}</c:set>
             <c:set var="compKillUrl"><c:out value='${controllerPath}'/>?action=killComp&compName=<c:out
                     value='${comp.CC_ALIAS}'/>&server=${serverName}</c:set>
-            <c:set var="compStateClass">
-                <c:choose>
-                    <c:when test="${comp.CP_DISP_RUN_STATE == 'Online' or comp.CP_DISP_RUN_STATE == 'Running'}">
-                        siebel-comp-online
-                    </c:when>
-                    <c:when test="${comp.CP_DISP_RUN_STATE == 'Not Online' or comp.CP_DISP_RUN_STATE == 'Shutting down'}">
-                        siebel-comp-not-online
-                    </c:when>
-                    <c:otherwise>
-                        siebel-comp-shutdown
-                    </c:otherwise>
-                </c:choose>
+            <c:set var="compStateClass"
+                   value="siebel-comp-${fn:replace(fn:toLowerCase(comp.CP_DISP_RUN_STATE), ' ' , '')}">
+                <%--<c:choose>--%>
+                <%--<c:when test="${comp.CP_DISP_RUN_STATE == 'Online'}">--%>
+                <%--siebel-comp-online--%>
+                <%--</c:when>--%>
+                <%--<c:when test="${comp.CP_DISP_RUN_STATE == 'Running'}">--%>
+                <%--siebel-comp-running--%>
+                <%--</c:when>--%>
+                <%--<c:when test="${comp.CP_DISP_RUN_STATE == 'Shutting down'}">--%>
+                <%--siebel-comp-online--%>
+                <%--</c:when>--%>
+                <%--<c:when test="${comp.CP_DISP_RUN_STATE == 'Online' or comp.CP_DISP_RUN_STATE == 'Running'}">--%>
+                <%--siebel-comp-online--%>
+                <%--</c:when>--%>
+                <%--<c:when test="${comp.CP_DISP_RUN_STATE == 'Not Online' or comp.CP_DISP_RUN_STATE == 'Shutting down'}">--%>
+                <%--siebel-comp-not-online--%>
+                <%--</c:when>--%>
+                <%--<c:otherwise>--%>
+                <%--siebel-comp-shutdown--%>
+                <%--</c:otherwise>--%>
+                <%--</c:choose>--%>
             </c:set>
-            <%--<c:set var="onclick">BS.openUrl(event, '${servListComps}'); return false;</c:set>--%>
-            <tr <%--onclick="${onclick}"--%>data-comp-alias="${comp.CC_ALIAS}">
+            <tr data-comp-alias="${comp.CC_ALIAS}">
                 <td class="name highlight" data-param-name="CC_NAME">${comp.CC_NAME}</td>
                 <td class="name highlight" data-param-name="CC_ALIAS">${comp.CC_ALIAS}</td>
-                <td class="name highlight" data-param-name="CP_DISP_RUN_STATE">
-                    ${comp.CP_DISP_RUN_STATE}</td>
+                <td class="name highlight ${compStateClass}" data-param-name="CP_DISP_RUN_STATE">
+                        ${comp.CP_DISP_RUN_STATE}
+                </td>
                 <td class="name highlight" data-param-name>${comp.CP_START_TIME}</td>
-                <td class="actions edit highlight">
-                    <a href="${compRestartUrl}">Restart</a>
-                </td>
-                <td class="actions edit highlight">
-                    <a href="#" onclick="ServerManager.AjaxRequest('${compKillUrl}'); return false">Kill</a>
-                </td>
-                    <%--<td class="name highlight">${server.SBLSRVR_STATE}</td>--%>
-                    <%--<td class="name highlight">${server.HOST_NAME}</td>--%>
-                    <%--<td class="name highlight">${server.START_TIME}</td>--%>
-                    <%--<td class="highlight" onclick="${onclick}"><c:out value="${configuration.templateName}"/></td>--%>
                     <%--<td class="actions edit highlight">--%>
-                    <%--<a href="${confEditUrl}">Edit</a>--%>
+                    <%--<a href="${compRestartUrl}">Restart</a>--%>
                     <%--</td>--%>
-                    <%--<td class="actions edit highlight last">--%>
-                    <%--<a href="${confDeleteUrl}"--%>
-                    <%--onclick="return confirm('Are you sure you want to delete server configuration?')">Delete</a>--%>
-                    <%--</td>--%>
+                <td class="actions edit highlight">
+                    <a href="#"
+                       onclick="ServerManager.killComp('${serverName}', '${comp.CC_ALIAS}'); return false">Kill</a>
+                </td>
+                <td class="actions edit highlight">
+                    <a href="#"
+                       onclick="ServerManager.startComp('${serverName}', '${comp.CC_ALIAS}'); return false">Start</a>
+                </td>
             </tr>
         </c:forEach>
     </l:tableWithHighlighting>
-      <script type="text/javascript">ServerManager.refreshCompState('${controllerPath}','${serverName}')</script>
+      <script type="text/javascript">
+          if (typeof(ServerManager) === "undefined")
+              ServerManager = new ServerManagerConstructor('${controllerPath}');
+          ServerManager.refreshCompState('${serverName}');
+      </script>
   </jsp:attribute>
 </bs:page>

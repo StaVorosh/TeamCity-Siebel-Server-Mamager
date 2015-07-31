@@ -57,23 +57,7 @@ public class SiebelServerManager {
 
   public List<Map> restartComp(final String enterpriseName, final String serverHostName, final String compName) throws IOException, SrvrMgrException {
     List<Map> killResult = this.killComp(enterpriseName, serverHostName, compName);
-
-//    Timer timer = new Timer();
-//    TimerTask task = new TimerTask() {
-//      @Override
-//      public void run() throws IOException{
-//        String compState = getCompState(listComp(enterpriseName, serverHostName, compName);
-//        if(compState != "Online" || compState != "Running");
-//
-//      }
-//    }
-
-
     List<Map> listResult = this.listComp(enterpriseName, serverHostName, compName);
-
-
-//    return this.execute(enterpriseName, command);
-
     return killResult;
   }
 
@@ -84,13 +68,6 @@ public class SiebelServerManager {
   public List<Map> listComp(String enterpriseName, String serverHostName, String compName) throws IOException, SrvrMgrException {
     String command = "list comp " + compName + " for server " + serverHostName;
     return this.execute(enterpriseName, command);
-  }
-
-  public List<Long> getPIDs() {
-    List<Long> PIDs = new ArrayList<Long>();
-    for (ServerManagerInstance Instance : srvrmgrPool.getPool())
-      PIDs.add(Instance.getPID());
-    return PIDs;
   }
 
   public List<Map> execute(String enterpriseName, String command) throws IOException, SrvrMgrException {

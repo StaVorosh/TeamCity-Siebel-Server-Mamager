@@ -15,6 +15,7 @@
  */
 
 package TeamCitySrvrmgr.server;
+import jetbrains.buildServer.log.Loggers;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -39,11 +40,15 @@ public class ServerManagerPool {
         try{
           checkPoolInstances(20000L);
         }
-        catch (IOException e){}
-        catch (SrvrMgrException e) {}
+        catch (IOException e){
+          Loggers.SERVER.error("TASK : " + e);
+        }
+        catch (SrvrMgrException e) {
+          Loggers.SERVER.error("TASK : " + e);
+        }
       }
     };
-    timer.schedule(task, 0L, 21000L);
+    timer.schedule(task, 0L, 20000L);
   }
 
   private void checkPoolInstances(long idleTime) throws IOException, SrvrMgrException {
@@ -53,12 +58,11 @@ public class ServerManagerPool {
         Instance.executeCommand("exit");
         Instance.getProcessInput().close();
         Instance.getProcessOutputStream().close();
-//        Instance.getProcessOutput().close();
         Instance.getProcess().destroy();
         it.remove();
-        System.out.println(this.Pool);
       }
     }
+    System.out.println(getPool());
   }
 
   public List<ServerManagerInstance> getPool() {

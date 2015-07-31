@@ -2,6 +2,7 @@ package TeamCitySrvrmgr.server;
 
 import com.google.gson.Gson;
 import jetbrains.buildServer.controllers.BaseController;
+import jetbrains.buildServer.log.Loggers;
 import jetbrains.buildServer.users.SUser;
 import jetbrains.buildServer.web.openapi.PluginDescriptor;
 import jetbrains.buildServer.web.openapi.WebControllerManager;
@@ -14,6 +15,7 @@ import sun.org.mozilla.javascript.internal.json.JsonParser;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,11 +56,7 @@ public class Controller extends BaseController {
 
       if (action.equals("listServers")) {
         List<Map> serverList;
-        try {
-          serverList = mySiebelServerManager.getServers(enterpriseName);
-        } catch (SrvrMgrException ex) {
-          return ErrorView(ex);
-        }
+        serverList = mySiebelServerManager.getServers(enterpriseName);
         ModelAndView view = new ModelAndView(myPluginDescriptor.getPluginResourcesPath(SERVERS_LIST));
         final Map<String, Object> model = view.getModel();
         model.put("pluginName", Util.PLUGIN_NAME);
@@ -66,11 +64,7 @@ public class Controller extends BaseController {
         return view;
       } else if (action.equals("listComps")) {
         List<Map> paramList;
-        try {
-          paramList = mySiebelServerManager.getServerComps(enterpriseName, request.getParameter("server"));
-        } catch (SrvrMgrException ex) {
-          return ErrorView(ex);
-        }
+        paramList = mySiebelServerManager.getServerComps(enterpriseName, request.getParameter("server"));
         ModelAndView view = new ModelAndView(myPluginDescriptor.getPluginResourcesPath(SERVER_COMPONENTS_LIST));
         final Map<String, Object> model = view.getModel();
         model.put("pluginName", Util.PLUGIN_NAME);
@@ -80,66 +74,48 @@ public class Controller extends BaseController {
         return view;
       } else if (action.equals("killComp")) {
         List<Map> listComp;
-        try {
-          listComp = mySiebelServerManager.killComp(enterpriseName, request.getParameter("server"), request.getParameter("compName"));
-        } catch (SrvrMgrException ex) {
-          ErrorView(ex);
-        }
-        response.setHeader("content-type", "application/json");
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("status", "success");
-        List<Map> list = new ArrayList<Map>();
-        list.add(map);
-        response.getWriter().write(new Gson().toJson(map));
+        listComp = mySiebelServerManager.killComp(enterpriseName, preparateParameter(request.getParameter("server")), preparateParameter(request.getParameter("compName")));
+        writeListToJSON(response, listComp);
         return null;
       } else if (action.equals("startComp")) {
-        List<Map> listComp;
-        try {
-          listComp = mySiebelServerManager.startComp(enterpriseName, request.getParameter("server"), request.getParameter("compName"));
-        } catch (SrvrMgrException ex) {
-          ErrorView(ex);
-        }
-        response.setHeader("content-type", "application/json");
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("status", "success");
-        List<Map> list = new ArrayList<Map>();
-        list.add(map);
-        response.getWriter().write(new Gson().toJson(map));
+        List<Map> listComp = mySiebelServerManager.startComp(enterpriseName, preparateParameter(request.getParameter("server")), preparateParameter(request.getParameter("compName")));
+        writeListToJSON(response, listComp);
         return null;
       } else if (action.equals("getCompState")) {
-        String compState = mySiebelServerManager.getCompState(enterpriseName, request.getParameter("server"), request.getParameter("compName"));
-        response.setHeader("content-type", "application/json");
+        String compState = mySiebelServerManager.getCompState(enterpriseName, preparateParameter(request.getParameter("server")), preparateParameter(request.getParameter("compName")));
         Map<String, String> resultMap = new HashMap<String, String>();
         resultMap.put("state", compState);
         resultMap.put("component", request.getParameter("compName"));
-        response.getWriter().write(new Gson().toJson(resultMap));
+        writeMapToJSON(response, resultMap);
         return null;
       } else if (action.equals("refreshCompState")) {
         List<Map> listComp;
-        try {
-          listComp = mySiebelServerManager.getServerComps(enterpriseName, request.getParameter("server"));
-        } catch (SrvrMgrException ex) {
-          return ErrorView(ex);
-        }
-        response.setHeader("content-type", "application/json");
-        Map<String, String> resultMap = new HashMap<String, String>();
-        for (Map<String, String> comp : listComp)
-          resultMap.put(comp.get("CC_ALIAS"), comp.get("CP_DISP_RUN_STATE"));
-        response.getWriter().write(new Gson().toJson(resultMap));
+        listComp = mySiebelServerManager.getServerComps(enterpriseName, preparateParameter(request.getParameter("server")));
+        writeListToJSON(response, listComp);
         return null;
-      } else if (action.equals("listPID")) {
-        ModelAndView view = new ModelAndView(myPluginDescriptor.getPluginResourcesPath(PID_LIST));
-        final Map<String, Object> model = view.getModel();
-        model.put("pluginName", Util.PLUGIN_NAME);
-        model.put("controllerPath", CONTROLLER_PATH);
-        model.put("serverName", request.getParameter("server"));
-        model.put("PIDList", mySiebelServerManager.getPIDs());
-        return view;
       }
-    } catch (Exception e) {
-      System.out.println(e);
+    } catch (SrvrMgrException ex) {
+      Loggers.SERVER.error("QWEQWEQWE " + ex);
+      return ErrorView(ex);
     }
     return new ModelAndView();
+  }
+
+  private void writeListToJSON(HttpServletResponse response, List<Map> list) throws IOException{
+    response.setHeader("content-type", "application/json");
+    Map<String, String> resultMap = new HashMap<String, String>();
+    for (Map<String, String> listItem : list)
+      resultMap.put(listItem.get("CC_ALIAS"), listItem.get("CP_DISP_RUN_STATE"));
+    response.getWriter().write(new Gson().toJson(resultMap));
+  }
+
+  private void writeMapToJSON(HttpServletResponse response, Map map) throws IOException{
+    response.setHeader("content-type", "application/json");
+    response.getWriter().write(new Gson().toJson(map));
+  }
+
+  private String preparateParameter (String param){
+    return "\"" + param.replaceAll("[\n\r]", "").replaceAll("\"", "\\\"") + "\"";
   }
 
   private ModelAndView ErrorView(SrvrMgrException ex) {

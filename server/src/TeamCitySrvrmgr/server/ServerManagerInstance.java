@@ -16,10 +16,6 @@
 
 package TeamCitySrvrmgr.server;
 
-//import com.sun.jna.Pointer;
-//import com.sun.jna.platform.win32.Kernel32;
-//import com.sun.jna.platform.win32.WinNT;
-
 import TeamCitySrvrmgr.common.Util;
 import jetbrains.buildServer.log.Loggers;
 
@@ -42,22 +38,15 @@ public class ServerManagerInstance {
   private String enterpriseName;
   private String[] runTimeCommand;
   private BufferedWriter processInput;
-//  private BufferedReader processOutput;
   private InputStream processOutputStream;
-  private Long PID;
-
-  public void setRunTimeCommand(String[] runTimeCommand) {
-    this.runTimeCommand = runTimeCommand;
-  }
 
   public ServerManagerInstance(String[] runTimeCommand, String enterpriseName) throws IOException, SrvrMgrException {
     setEnterpriseName(enterpriseName);
     setRunTimeCommand(runTimeCommand);
     startProcess();
-//    System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAA " + result);
   }
 
-  private void startProcess() throws IOException, SrvrMgrException{
+  private void startProcess() throws IOException, SrvrMgrException {
     ProcessBuilder builder = new ProcessBuilder(runTimeCommand);
     this.lastCommandDate = System.currentTimeMillis();
     try {
@@ -83,12 +72,11 @@ public class ServerManagerInstance {
         } catch (InterruptedException ex) {
         }
       }
-      if(result.contains(("Fatal error")))
-      {
+      if (result.contains(("Fatal error"))) {
         this.process.destroy();
         throw new SrvrMgrException("Could not open connection to Siebel Gateway configuration");
       }
-      System.out.println(result);
+//      System.out.println(result);
       inputData = new byte[1024];
     }
   }
@@ -108,23 +96,22 @@ public class ServerManagerInstance {
       processInput.write(srvrmgrCommand);
       processInput.newLine();
       processInput.flush();
-    }
-    catch (IOException ex)
-    {
-        if(!srvrmgrCommand.equals("exit")) {
-          getProcessInput().close();
-          getProcessOutputStream().close();
-          startProcess();
-          executeCommand(srvrmgrCommand);
-          Loggers.SERVER.error(Util.PLUGIN_NAME + ": Process has been killed. Restarting process", ex);
+    } catch (IOException ex) {
+      if (!srvrmgrCommand.equals("exit")) {
+        getProcessInput().close();
+        getProcessOutputStream().close();
+        getProcess().destroy();
+        startProcess();
+        result = executeCommand(srvrmgrCommand);
+        Loggers.SERVER.error(Util.PLUGIN_NAME + ": Process has been killed. Restarting process", ex);
 //          throw new SrvrMgrException("Process has been killed. Restarting process");
-        }
-      else
-          Loggers.SERVER.error(Util.PLUGIN_NAME + ": Process has been killed already", ex);
+        return result;
+      } else
+        Loggers.SERVER.error(Util.PLUGIN_NAME + ": Process has been killed already", ex);
 //          throw new SrvrMgrException("Process has been killed already");
     }
 
-    while ((readInputStreamWithTimeout(processOutputStream, inputData, 1000)) > 0) {
+    while ((readInputStreamWithTimeout(processOutputStream, inputData, 1000)) > 0 || !result.contains("srvrmgr>")) {
       result += new String(inputData, StandardCharsets.UTF_8);
       inputData = new byte[1024];
     }
@@ -136,80 +123,56 @@ public class ServerManagerInstance {
   }
 
   private static int readInputStreamWithTimeout(InputStream is, byte[] b, int timeoutMillis) throws IOException {
-    int bufferOffset = 0;
-    long maxTimeMillis = System.currentTimeMillis() + timeoutMillis;
-    while (System.currentTimeMillis() < maxTimeMillis && bufferOffset < b.length) {
-      int readLength = java.lang.Math.min(is.available(), b.length - bufferOffset);
-      int readResult = is.read(b, bufferOffset, readLength);
-      if (readResult == -1)
-        break;
-      bufferOffset += readResult;
+    try {
+      int bufferOffset = 0;
+      long maxTimeMillis = System.currentTimeMillis() + timeoutMillis;
+      while (System.currentTimeMillis() < maxTimeMillis && bufferOffset < b.length) {
+        int readLength = java.lang.Math.min(is.available(), b.length - bufferOffset);
+        int readResult = is.read(b, bufferOffset, readLength);
+        if (readResult == -1)
+          break;
+        bufferOffset += readResult;
+      }
+      return bufferOffset;
     }
-    return bufferOffset;
+    catch (IOException ex){
+      Loggers.SERVER.error("Error reading stream. Stream closed: " + ex);
+      return -1;
+    }
   }
 
   public BufferedWriter getProcessInput() {
     return processInput;
   }
-
   public InputStream getProcessOutputStream() {
     return processOutputStream;
   }
-
   public Process getProcess() {
     return process;
   }
-
   public boolean getLocked() {
     return locked;
   }
-
   public long getLastCommandDate() {
     return lastCommandDate;
   }
-
   public String getEnterpriseName() {
     return enterpriseName;
   }
-
   public void setLocked() {
     this.locked = true;
   }
-
   public void setUnLocked() {
     this.locked = false;
   }
-
   public void setLastCommandDate(long lastCommandDate) {
     this.lastCommandDate = lastCommandDate;
   }
-
-  public Long getPID() {
-    return PID;
-  }
-
   public void setEnterpriseName(String enterpriseName) {
     this.enterpriseName = enterpriseName;
   }
+  public void setRunTimeCommand(String[] runTimeCommand) {
+    this.runTimeCommand = runTimeCommand;
+  }
 
-//  private static Long windowsProcessId(Process process) {
-//    if (process.getClass().getName().equals("java.lang.Win32Process")
-//            || process.getClass().getName().equals("java.lang.ProcessImpl")) {
-///* determine the pid on windows plattforms */
-//      try {
-//        Field f = process.getClass().getDeclaredField("handle");
-//        f.setAccessible(true);
-//        long handl = f.getLong(process);
-//
-//        Kernel32 kernel = Kernel32.INSTANCE;
-//        W32API.HANDLE handle = new W32API.HANDLE();
-//        handle.setPointer(Pointer.createConstant(handl));
-//        int ret = kernel.GetProcessId(handle);
-//        return Long.valueOf(ret);
-//      } catch (Throwable e) {
-//        e.printStackTrace();
-//      }
-//    }
-//    return null;
-//  }
 }
