@@ -114,6 +114,8 @@ public class ServerManagerInstance {
     while ((readInputStreamWithTimeout(processOutputStream, inputData, 1000)) > 0 || !result.contains("srvrmgr>")) {
       result += new String(inputData, StandardCharsets.UTF_8);
       inputData = new byte[1024];
+      if(result.contains("Disconnecting from server"))
+        break;
     }
 
     this.setLastCommandDate(System.currentTimeMillis());
