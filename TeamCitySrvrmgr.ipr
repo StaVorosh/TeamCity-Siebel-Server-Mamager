@@ -44,7 +44,12 @@
           <element id="artifact" artifact-name="TeamCitySrvrmgr-common.jar" />
           <element id="archive" name="TeamCitySrvrmgr-server.jar">
             <element id="module-output" name="TeamCitySrvrmgr-server" />
+            <element id="directory" name="META-INF">
+              <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
+            </element>
           </element>
+          <element id="file-copy" path="$PROJECT_DIR$/lib-compile/jna-4.1.0.jar" />
+          <element id="file-copy" path="$PROJECT_DIR$/lib-compile/jna-platform-4.1.0.jar" />
         </element>
       </root>
     </artifact>
@@ -126,6 +131,7 @@
   </component>
   <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false">
     <file url="file://$PROJECT_DIR$/server/resources/buildServerResources/PIDList.jsp" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/resources/buildServerResources/ProcessLog.jsp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server/resources/buildServerResources/ServerComponentsList.jsp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server/resources/buildServerResources/ServersList.jsp" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server/resources/buildServerResources/SrvrMgrErrorPage.jsp" charset="UTF-8" />
@@ -707,9 +713,9 @@
     <library name="TeamCity Open API server">
       <CLASSES>
         <root url="jar://$TEAMCITY_HOME$/devPackage/server-api.jar!/" />
-        <root url="jar://$PROJECT_DIR$/../jna-4.1.0.jar!/" />
-        <root url="jar://$PROJECT_DIR$/../jna-platform-4.1.0.jar!/" />
         <root url="jar://$TEAMCITY_HOME$/webapps/ROOT/WEB-INF/lib/gson-1.7.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib-compile/jna-4.1.0.jar!/" />
+        <root url="jar://$PROJECT_DIR$/lib-compile/jna-platform-4.1.0.jar!/" />
       </CLASSES>
       <JAVADOC>
         <root url="jar://$TEAMCITY_HOME$/devPackage/javadoc/openApi-help.jar!/" />

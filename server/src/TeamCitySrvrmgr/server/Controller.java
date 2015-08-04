@@ -32,6 +32,7 @@ public class Controller extends BaseController {
   private static final String SERVERS_LIST = "ServersList.jsp";
   private static final String SERVER_COMPONENTS_LIST = "ServerComponentsList.jsp";
   private static final String PID_LIST = "PIDList.jsp";
+  private static final String PROCESS_LOG = "ProcessLog.jsp";
   private static final String CONTROLLER_PATH = "/TeamCitySrvrmgr.html";
   private static final String ERROR_PAGE = "SrvrMgrErrorPage.jsp";
 
@@ -62,7 +63,8 @@ public class Controller extends BaseController {
         model.put("pluginName", Util.PLUGIN_NAME);
         model.put("serverList", serverList);
         return view;
-      } else if (action.equals("listComps")) {
+      }
+      else if (action.equals("listComps")) {
         List<Map> paramList;
         paramList = mySiebelServerManager.getServerComps(enterpriseName, request.getParameter("server"));
         ModelAndView view = new ModelAndView(myPluginDescriptor.getPluginResourcesPath(SERVER_COMPONENTS_LIST));
@@ -72,27 +74,49 @@ public class Controller extends BaseController {
         model.put("serverName", request.getParameter("server"));
         model.put("componentsList", paramList);
         return view;
-      } else if (action.equals("killComp")) {
+      }
+      else if (action.equals("killComp")) {
         List<Map> listComp;
         listComp = mySiebelServerManager.killComp(enterpriseName, preparateParameter(request.getParameter("server")), preparateParameter(request.getParameter("compName")));
         writeListToJSON(response, listComp);
         return null;
-      } else if (action.equals("startComp")) {
+      }
+      else if (action.equals("startComp")) {
         List<Map> listComp = mySiebelServerManager.startComp(enterpriseName, preparateParameter(request.getParameter("server")), preparateParameter(request.getParameter("compName")));
         writeListToJSON(response, listComp);
         return null;
-      } else if (action.equals("getCompState")) {
+      }
+      else if (action.equals("getCompState")) {
         String compState = mySiebelServerManager.getCompState(enterpriseName, preparateParameter(request.getParameter("server")), preparateParameter(request.getParameter("compName")));
         Map<String, String> resultMap = new HashMap<String, String>();
         resultMap.put("state", compState);
         resultMap.put("component", request.getParameter("compName"));
         writeMapToJSON(response, resultMap);
         return null;
-      } else if (action.equals("refreshCompState")) {
+      }
+      else if (action.equals("refreshCompState")) {
         List<Map> listComp;
         listComp = mySiebelServerManager.getServerComps(enterpriseName, preparateParameter(request.getParameter("server")));
         writeListToJSON(response, listComp);
         return null;
+      }
+      /*TODO: debug*/
+      else if(action.equals("activeProcesses")){
+        List<Map> activeProcesses = mySiebelServerManager.getProcesses();
+        ModelAndView view = new ModelAndView(myPluginDescriptor.getPluginResourcesPath(PID_LIST));
+        Map<String, Object> model = view.getModel();
+        model.put("processes", activeProcesses);
+        model.put("pluginName", Util.PLUGIN_NAME);
+        return view;
+      }
+      /*TODO: debug*/
+      else if(action.equals("processLog")){
+        ModelAndView view = new ModelAndView(myPluginDescriptor.getPluginResourcesPath(PROCESS_LOG));
+        Map<String, Object> model = view.getModel();
+        model.put("processLog", mySiebelServerManager.getProcessLog(Integer.parseInt(request.getParameter("process"))));
+        model.put("processId", request.getParameter("process"));
+        model.put("pluginName", Util.PLUGIN_NAME);
+        return view;
       }
     } catch (SrvrMgrException ex) {
       Loggers.SERVER.error("QWEQWEQWE " + ex);

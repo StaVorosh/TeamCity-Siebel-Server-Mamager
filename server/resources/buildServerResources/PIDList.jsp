@@ -29,20 +29,23 @@
   <jsp:attribute name="body_include">
     <h1>${pluginName}</h1>
     <div class="grayNote">Process ID list</div>
-    <l:tableWithHighlighting className="parametersTable" id="servers">
+    <l:tableWithHighlighting className="parametersTable" id="processes">
         <tr>
             <th>Process ID</th>
-            <%--<th>State</th>--%>
-            <%--<th>Host Name</th>--%>
-            <%--<th>Start Time</th>--%>
+            <th>Last Command Date</th>
+            <th>Enterprise Name</th>
+            <th>Locked</th>
         </tr>
-        <c:forEach var="pid" items="${PIDList}">
-            <%--<c:set var="servListComps">${pluginUrl}action=listComps&server=<c:out value='${server.HOST_NAME}'/></c:set>--%>
+        <c:forEach var="pid" items="${processes}">
+            <c:set var="processLog">${pluginUrl}action=processLog&process=<c:out value='${pid.PID}'/></c:set>
             <%--<c:set var="confDeleteUrl"><c:out value='${controllerPath}'/>?action=delete&name=<c:out--%>
                     <%--value='${configuration.name}'/></c:set>--%>
-            <%--<c:set var="onclick">BS.openUrl(event, '${servListComps}'); return false;</c:set>--%>
-            <tr>
-                <td class="name highlight">${pid}</td>
+            <c:set var="onclick">BS.openUrl(event, '${processLog}'); return false;</c:set>
+            <tr onclick="${onclick}">
+                <td class="name highlight">${pid.PID}</td>
+                <td class="name highlight">${pid.LastCommandDate}</td>
+                <td class="name highlight">${pid.Enterprise}</td>
+                <td class="name highlight">${pid.Locked}</td>
                 <%--<td class="name highlight">${server.SBLSRVR_STATE}</td>--%>
                 <%--<td class="name highlight">${server.HOST_NAME}</td>--%>
                 <%--<td class="name highlight">${server.START_TIME}</td>--%>

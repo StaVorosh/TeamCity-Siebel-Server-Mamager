@@ -1,12 +1,5 @@
-/*.siebel-comp-online,*/
-/*.siebel-comp-not-online,*/
-/*.siebel-comp-shutdown {*/
-/*width: 20px;*/
-/*height: 20px;*/
-/*border-radius: 20px;*/
-/*}*/
 td.highlight[data-param-name="CP_DISP_RUN_STATE"]{
-    width: 100px;
+    width: 115px;
 }
 
 .srvrmgr-popup{

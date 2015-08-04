@@ -139,4 +139,31 @@ public class SiebelServerManager {
 
     return tmp;
   }
+
+  public List<Map> getProcesses(){
+    List<Map> processList = new ArrayList<Map>();
+    for(Iterator<ServerManagerInstance> it = this.srvrmgrPool.getPool().iterator(); it.hasNext();)
+    {
+      ServerManagerInstance Instance = it.next();
+      Map<String, Object> instanceData = new HashMap<String, Object>();
+      instanceData.put("PID", Instance.getPID());
+      instanceData.put("LastCommandDate", new Date(Instance.getLastCommandDate()));
+      instanceData.put("Enterprise", Instance.getEnterpriseName());
+      instanceData.put("Locked",Instance.getLocked());
+      processList.add(instanceData);
+    }
+    return processList;
+  }
+
+  /*TODO: debug*/
+  public List<Map> getProcessLog(int PID)
+  {
+    for(Iterator<ServerManagerInstance> it = this.srvrmgrPool.getPool().iterator(); it.hasNext();)
+    {
+      ServerManagerInstance Instance = it.next();
+      if(Instance.getPID() == PID)
+        return Instance.getProcessLog();
+    }
+    return null;
+  }
 }
